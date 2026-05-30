@@ -2,7 +2,7 @@
   "name": "Yabank Premium",
   "short_name": "Yabank",
   "description": "Gestor inteligente de prestamos personales",
-  "start_url": "/",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#0a1628",
   "theme_color": "#0a1628",
