@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0c1222">
+    <meta name="background-color" content="#0c1222">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Yabank">
+    <meta name="description" content="Gestor inteligente de prestamos personales">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%232dd4bf'/%3E%3Cstop offset='100%25' stop-color='%23a78bfa'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect fill='url(%23g)' width='192' height='192' rx='36'/%3E%3Ctext x='96' y='132' font-size='95' text-anchor='middle' fill='%23ffffff' font-family='Arial' font-weight='bold'%3E%24%3C/text%3E%3C/svg%3E">
+    <link rel="stylesheet" href="style.css">
+    <title>Yabank</title>
+</head>
+<body>
+    <div id="app" class="app">
+        <!-- Ambient background effects -->
+        <div class="ambient-bg">
+            <div class="orb orb-1"></div>
+            <div class="orb orb-2"></div>
+            <div class="orb orb-3"></div>
+        </div>
+
+        <!-- HEADER -->
+        <header class="app-header">
+            <div class="header-top">
+                <div class="brand">
+                    <div class="brand-icon-wrap">
+                        <span class="material-symbols-outlined brand-icon">savings</span>
+                    </div>
+                    <h1 class="brand-name">Yabank</h1>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-icon" id="btn-toggle-amounts" title="Mostrar/Ocultar montos">
+                        <span class="material-symbols-outlined" id="eye-icon">visibility</span>
+                    </button>
+                    <div class="header-menu-wrap">
+                        <button class="btn-icon" id="btn-menu" title="Menu">
+                            <span class="material-symbols-outlined">more_vert</span>
+                        </button>
+                        <div class="header-dropdown" id="header-dropdown">
+                            <button class="dropdown-item" id="menu-add-capital">
+                                <span class="material-symbols-outlined">trending_up</span>
+                                <span>Agregar Dinero</span>
+                            </button>
+                            <button class="dropdown-item" id="menu-retirar">
+                                <span class="material-symbols-outlined">trending_down</span>
+                                <span>Retirar Dinero</span>
+                            </button>
+                            <button class="dropdown-item" id="menu-export">
+                                <span class="material-symbols-outlined">archive</span>
+                                <span>Exportar/Importar</span>
+                            </button>
+                            <button class="dropdown-item" id="menu-config">
+                                <span class="material-symbols-outlined">settings</span>
+                                <span>Configuración</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="header-glass">
+                <div class="header-glass-left">
+                    <span class="material-symbols-outlined header-glass-icon">paid</span>
+                    <div class="header-glass-info">
+                        <span class="header-glass-label">Patrimonio Total</span>
+                        <span class="header-glass-value" id="header-total">S/ 0.00</span>
+                    </div>
+                </div>
+                <div class="header-glass-right" id="header-comprometido">
+                    <span class="header-glass-label">Capital</span>
+                    <span class="header-glass-value-alt" id="header-comp-value">S/ 0.00</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- VIEW CONTAINER -->
+        <main class="views-container">
+            <!-- DASHBOARD VIEW -->
+            <div id="view-dashboard" class="view view-active">
+                <div class="view-scroll">
+                    <div class="dashboard">
+                        <div class="glass-card glass-card-wide">
+                            <div class="glass-card-accent"></div>
+                            <div class="glass-icon"><span class="material-symbols-outlined">wallet</span></div>
+                            <div class="glass-label">Capital Disponible</div>
+                            <div class="glass-value" id="dash-capital">S/ 0.00</div>
+                            <div class="glass-hint">Efectivo para prestar</div>
+                        </div>
+                        <div class="glass-card">
+                            <div class="glass-card-accent accent-amber"></div>
+                            <div class="glass-icon icon-amber"><span class="material-symbols-outlined">request_quote</span></div>
+                            <div class="glass-label">Invertido</div>
+                            <div class="glass-value" id="dash-prestado">S/ 0.00</div>
+                            <div class="glass-hint">En préstamos activos</div>
+                        </div>
+                        <div class="glass-card">
+                            <div class="glass-card-accent accent-emerald"></div>
+                            <div class="glass-icon icon-emerald"><span class="material-symbols-outlined">trending_up</span></div>
+                            <div class="glass-label">Ganancias</div>
+                            <div class="glass-value" id="dash-ganancias">S/ 0.00</div>
+                            <div class="glass-hint">Intereses cobrados</div>
+                        </div>
+                        <div class="glass-card">
+                            <div class="glass-card-accent accent-blue"></div>
+                            <div class="glass-icon icon-blue"><span class="material-symbols-outlined">overview</span></div>
+                            <div class="glass-label">Operaciones</div>
+                            <div class="glass-value" id="dash-total-prestamos">0</div>
+                            <div class="glass-hint">Total préstamos</div>
+                        </div>
+                        <div class="glass-card">
+                            <div class="glass-card-accent accent-rose"></div>
+                            <div class="glass-icon icon-rose"><span class="material-symbols-outlined">warning</span></div>
+                            <div class="glass-label">Vencidos</div>
+                            <div class="glass-value" id="dash-vencidos">0</div>
+                            <div class="glass-hint">Requieren atención</div>
+                        </div>
+                    </div>
+                    <div class="view-spacer"></div>
+                </div>
+            </div>
+
+            <!-- LOANS VIEW -->
+            <div id="view-loans" class="view">
+                <div class="view-scroll">
+                    <div class="view-header-bar">
+                        <span class="view-title">Préstamos Activos</span>
+                        <span class="view-count" id="count-activos">0</span>
+                    </div>
+                    <div class="search-box">
+                        <input type="text" id="search-activos" placeholder="Buscar por nombre, DNI o monto..." autocomplete="off">
+                        <button class="search-clear" id="clear-search-activos" type="button">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+                    </div>
+                    <div id="lista-activos" class="cards-list"></div>
+                    <div class="view-spacer"></div>
+                </div>
+            </div>
+
+            <!-- HISTORY VIEW -->
+            <div id="view-history" class="view">
+                <div class="view-scroll">
+                    <div class="view-header-bar">
+                        <span class="view-title">Historial</span>
+                        <span class="view-count" id="count-historial">0</span>
+                    </div>
+                    <div class="search-box">
+                        <input type="text" id="search-historial" placeholder="Buscar por nombre, DNI, monto o motivo..." autocomplete="off">
+                        <button class="search-clear" id="clear-search-historial" type="button">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+                    </div>
+                    <div id="lista-historial" class="cards-list"></div>
+                    <div class="view-spacer"></div>
+                </div>
+            </div>
+        </main>
+
+        <!-- BOTTOM NAV -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-view="dashboard">
+                <div class="nav-glow"></div>
+                <span class="nav-icon material-symbols-outlined">dashboard</span>
+                <span class="nav-label">Inicio</span>
+            </button>
+            <button class="nav-item" data-view="loans">
+                <div class="nav-glow"></div>
+                <span class="nav-icon material-symbols-outlined">account_balance</span>
+                <span class="nav-label">Préstamos</span>
+            </button>
+            <button class="nav-item" data-view="history">
+                <div class="nav-glow"></div>
+                <span class="nav-icon material-symbols-outlined">history</span>
+                <span class="nav-label">Historial</span>
+            </button>
+        </nav>
+
+        <!-- FAB -->
+        <button class="fab" id="fab-add">
+            <div class="fab-glow"></div>
+            <span class="material-symbols-outlined">add</span>
+        </button>
+
+        <!-- ADD LOAN MODAL -->
+        <div class="modal-overlay" id="modal-add">
+            <div class="modal-sheet">
+                <div class="modal-handle"></div>
+                <div class="modal-header">
+                    <h2><span class="material-symbols-outlined">edit_note</span> Nuevo Préstamo</h2>
+                    <button class="btn-icon btn-close-modal" data-modal="modal-add">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="add-nombre">Nombre del prestatario</label>
+                        <input type="text" id="add-nombre" placeholder="Ej: Carlos Ruiz" maxlength="16" autocomplete="off">
+                        <span class="char-count" id="counter-nombre">0/16</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="add-dni">DNI</label>
+                        <input type="tel" id="add-dni" placeholder="12345678" maxlength="8" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+                        <span class="char-count" id="counter-dni">0/8</span>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="add-monto">Monto</label>
+                            <div class="input-wrap">
+                                <input type="tel" id="add-monto" placeholder="0" maxlength="4" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+                                <span class="input-suffix">S/</span>
+                            </div>
+                            <span class="char-count" id="counter-monto">0/4</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="add-tasa">Interés</label>
+                            <div class="input-wrap">
+                                <input type="tel" id="add-tasa" value="20" maxlength="2" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+                                <span class="input-suffix">%</span>
+                            </div>
+                            <span class="char-count" id="counter-tasa">0/2</span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="add-fecha-inicio">Fecha inicio</label>
+                            <input type="date" id="add-fecha-inicio">
+                        </div>
+                        <div class="form-group">
+                            <label for="add-fecha-fin">Fecha cierre</label>
+                            <input type="date" id="add-fecha-fin">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="add-billetes">Serie de billetes (Opcional)</label>
+                        <textarea id="add-billetes" placeholder="AB12345678, CD87654321..."></textarea>
+                    </div>
+                    <button class="btn-gradient" id="btn-add-loan">
+                        <span class="material-symbols-outlined">save</span>
+                        Crear Préstamo
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- EDIT LOAN MODAL -->
+        <div class="modal-overlay" id="modal-edit">
+            <div class="modal-sheet">
+                <div class="modal-handle"></div>
+                <div class="modal-header">
+                    <h2><span class="material-symbols-outlined">edit</span> Editar Préstamo</h2>
+                    <button class="btn-icon btn-close-modal" data-modal="modal-edit">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="edit-nombre">Nombre del prestatario</label>
+                        <input type="text" id="edit-nombre" placeholder="Ej: Carlos Ruiz" maxlength="16" autocomplete="off">
+                        <span class="char-count" id="counter-edit-nombre">0/16</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-dni">DNI</label>
+                        <input type="tel" id="edit-dni" placeholder="12345678" maxlength="8" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+                        <span class="char-count" id="counter-edit-dni">0/8</span>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-monto">Monto</label>
+                            <div class="input-wrap">
+                                <input type="tel" id="edit-monto" placeholder="0" maxlength="4" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+                                <span class="input-suffix">S/</span>
+                            </div>
+                            <span class="char-count" id="counter-edit-monto">0/4</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-tasa">Interés</label>
+                            <div class="input-wrap">
+                                <input type="tel" id="edit-tasa" value="20" maxlength="2" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+                                <span class="input-suffix">%</span>
+                            </div>
+                            <span class="char-count" id="counter-edit-tasa">0/2</span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-fecha-inicio">Fecha inicio</label>
+                            <input type="date" id="edit-fecha-inicio">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-fecha-fin">Fecha cierre</label>
+                            <input type="date" id="edit-fecha-fin">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-nota">Nota de edición (opcional)</label>
+                        <input type="text" id="edit-nota" placeholder="Correccion de datos, Cambio de fecha..." autocomplete="off">
+                    </div>
+                    <button class="btn-gradient" id="btn-save-edit">
+                        <span class="material-symbols-outlined">save</span>
+                        Guardar Cambios
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADD MORE MODAL -->
+        <div class="modal-overlay" id="modal-add-more">
+            <div class="modal-sheet">
+                <div class="modal-handle"></div>
+                <div class="modal-header">
+                    <h2><span class="material-symbols-outlined">currency_exchange</span> Refinanciamiento</h2>
+                    <button class="btn-icon btn-close-modal" data-modal="modal-add-more">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="more-monto">Monto adicional</label>
+                        <div class="input-wrap">
+                            <input type="tel" id="more-monto" placeholder="0" maxlength="4" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+                            <span class="input-suffix">S/</span>
+                        </div>
+                        <span class="char-count" id="counter-more-monto">0/4</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="more-fecha-fin">Nueva fecha de vencimiento (opcional)</label>
+                        <input type="date" id="more-fecha-fin">
+                    </div>
+                    <div class="form-group">
+                        <label for="more-nota">Nota / Motivo (opcional)</label>
+                        <input type="text" id="more-nota" placeholder="Ampliacion de capital, Renovacion..." autocomplete="off">
+                    </div>
+                    <button class="btn-gradient btn-amber" id="btn-add-more">
+                        <span class="material-symbols-outlined">save</span>
+                        Confirmar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADD CUOTA MODAL -->
+        <div class="modal-overlay" id="modal-add-cuota">
+            <div class="modal-sheet">
+                <div class="modal-handle"></div>
+                <div class="modal-header">
+                    <h2><span class="material-symbols-outlined">price_check</span> Registrar Adelanto</h2>
+                    <button class="btn-icon btn-close-modal" data-modal="modal-add-cuota">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="info-box" id="cuota-info"></div>
+                    <div class="form-group">
+                        <label for="cuota-monto">Monto recibido</label>
+                        <div class="input-wrap">
+                            <input type="tel" id="cuota-monto" placeholder="0" maxlength="4" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+                            <span class="input-suffix">S/</span>
+                        </div>
+                        <span class="char-count" id="counter-cuota-monto">0/4</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="cuota-fecha">Fecha del pago</label>
+                        <input type="date" id="cuota-fecha">
+                    </div>
+                    <div class="form-group">
+                        <label for="cuota-nota">Nota (opcional)</label>
+                        <input type="text" id="cuota-nota" placeholder="Pago parcial, Abono..." autocomplete="off">
+                    </div>
+                    <button class="btn-gradient" id="btn-add-cuota">
+                        <span class="material-symbols-outlined">save</span>
+                        Registrar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- DELETE LOAN MODAL -->
+        <div class="modal-overlay" id="modal-delete">
+            <div class="modal-sheet">
+                <div class="modal-handle"></div>
+                <div class="modal-header">
+                    <h2><span class="material-symbols-outlined" style="color:var(--rose)">delete</span> Eliminar</h2>
+                    <button class="btn-icon btn-close-modal" data-modal="modal-delete">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="modal-desc">Se devolverá <strong id="delete-monto" class="highlight-text"></strong> al capital.<br>Se registrará en el historial.</p>
+                    <div class="form-group">
+                        <label for="delete-motivo">Motivo de eliminación</label>
+                        <input type="text" id="delete-motivo" placeholder="Error de registro, Cliente canceló..." autocomplete="off">
+                    </div>
+                    <button class="btn-gradient btn-rose" id="btn-confirm-delete">
+                        <span class="material-symbols-outlined">delete_forever</span>
+                        Confirmar Eliminación
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADD CAPITAL MODAL -->
+        <div class="modal-overlay" id="modal-add-capital">
+            <div class="modal-sheet">
+                <div class="modal-handle"></div>
+                <div class="modal-header">
+                    <h2><span class="material-symbols-outlined">trending_up</span> Agregar Dinero</h2>
+                    <button class="btn-icon btn-close-modal" data-modal="modal-add-capital">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="capital-monto">Monto a agregar</label>
+                        <div class="input-wrap">
+                            <input type="tel" id="capital-monto" placeholder="0" maxlength="4" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+                            <span class="input-suffix">S/</span>
+                        </div>
+                        <span class="char-count" id="counter-capital-monto">0/4</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="capital-motivo">Motivo / Origen</label>
+                        <input type="text" id="capital-motivo" placeholder="Ahorro personal, Inversion extra..." autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="capital-fecha">Fecha</label>
+                        <input type="date" id="capital-fecha">
+                    </div>
+                    <button class="btn-gradient" id="btn-add-capital">
+                        <span class="material-symbols-outlined">save</span>
+                        Agregar a Capital
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- RETIRAR MODAL -->
+        <div class="modal-overlay" id="modal-retirar">
+            <div class="modal-sheet">
+                <div class="modal-handle"></div>
+                <div class="modal-header">
+                    <h2><span class="material-symbols-outlined">trending_down</span> Retirar Dinero</h2>
+                    <button class="btn-icon btn-close-modal" data-modal="modal-retirar">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="retiro-monto">Monto a retirar</label>
+                        <div class="input-wrap">
+                            <input type="tel" id="retiro-monto" placeholder="0" maxlength="4" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+                            <span class="input-suffix">S/</span>
+                        </div>
+                        <span class="char-count" id="counter-retiro-monto">0/4</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="retiro-motivo">Motivo del retiro</label>
+                        <input type="text" id="retiro-motivo" placeholder="Compra de medicina, Gastos personales..." autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="retiro-fecha">Fecha</label>
+                        <input type="date" id="retiro-fecha">
+                    </div>
+                    <button class="btn-gradient btn-rose" id="btn-retirar">
+                        <span class="material-symbols-outlined">save</span>
+                        Retirar de Capital
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONFIG MODAL -->
+        <div class="modal-overlay" id="modal-config">
+            <div class="modal-sheet">
+                <div class="modal-handle"></div>
+                <div class="modal-header">
+                    <h2><span class="material-symbols-outlined">settings</span> Configuracion</h2>
+                    <button class="btn-icon btn-close-modal" data-modal="modal-config">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="glass-panel">
+                        <h3><span class="material-symbols-outlined">wallet</span> Capital</h3>
+                        <div class="form-group">
+                            <label for="config-capital">Capital disponible</label>
+                            <div class="input-wrap">
+                                <input type="tel" id="config-capital" placeholder="0" maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+                                <span class="input-suffix">S/</span>
+                            </div>
+                        </div>
+                        <button class="btn-gradient" id="btn-save-capital">
+                            <span class="material-symbols-outlined">save</span>
+                            Guardar
+                        </button>
+                    </div>
+                    <div class="glass-panel glass-panel-danger">
+                        <h3><span class="material-symbols-outlined">delete_forever</span> Zona Peligrosa</h3>
+                        <button class="btn-ghost btn-ghost-rose" id="btn-reset-all">
+                            <span class="material-symbols-outlined">delete</span>
+                            Borrar Todos los Datos
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- EXPORT MODAL -->
+        <div class="modal-overlay" id="modal-export">
+            <div class="modal-sheet modal-sheet-tall">
+                <div class="modal-handle"></div>
+                <div class="modal-header">
+                    <h2><span class="material-symbols-outlined">archive</span> Backup</h2>
+                    <button class="btn-icon btn-close-modal" data-modal="modal-export">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="glass-panel">
+                        <h3><span class="material-symbols-outlined">upload</span> Exportar</h3>
+                        <p class="panel-hint">Copia este JSON y guardalo como respaldo.</p>
+                        <textarea class="export-area" id="export-json" readonly></textarea>
+                        <button class="btn-gradient" id="btn-copy-export">
+                            <span class="material-symbols-outlined">content_copy</span>
+                            Copiar
+                        </button>
+                        <button class="btn-ghost" id="btn-download-export">
+                            <span class="material-symbols-outlined">download</span>
+                            Descargar .json
+                        </button>
+                    </div>
+                    <div class="glass-panel">
+                        <h3><span class="material-symbols-outlined">download</span> Importar</h3>
+                        <p class="panel-hint">Pega tu JSON de respaldo aqui.</p>
+                        <textarea class="export-area" id="import-json" placeholder="Pega tu JSON aqui..."></textarea>
+                        <button class="btn-gradient" id="btn-import-data">
+                            <span class="material-symbols-outlined">restore</span>
+                            Restaurar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
