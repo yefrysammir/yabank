@@ -5,6 +5,7 @@
 const STORAGE_KEY = 'yabank_aurora_v1';
 const AMOUNTS_KEY = 'yabank_amounts_vis';
 const SCROLL_KEY = 'yabank_scroll_pos';
+const NOTES_KEY = 'yabank_notes_v1';
 
 let currentAddMoreId = null;
 let currentCuotaId = null;
@@ -13,6 +14,48 @@ let currentEditId = null;
 let amountsVisible = true;
 let scrollPos = { dashboard: 0, loans: 0, history: 0 };
 let currentView = 'dashboard';
+
+/* ---------- PERU TIMEZONE HELPERS ---------- */
+function getPeruDateParts() {
+    const formatter = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'America/Lima',
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+    });
+    const parts = formatter.formatToParts(new Date());
+    const get = (type) => parts.find(p => p.type === type).value;
+    return {
+        year: parseInt(get('year')),
+        month: parseInt(get('month')),
+        day: parseInt(get('day'))
+    };
+}
+
+function getPeruDateStart() {
+    const p = getPeruDateParts();
+    return new Date(p.year, p.month - 1, p.day);
+}
+
+function getPeruDateStr() {
+    const p = getPeruDateParts();
+    const y = p.year;
+    const m = String(p.month).padStart(2, '0');
+    const d = String(p.day).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
+
+function parseDate(str) {
+    if (!str) return new Date(NaN);
+    const [y, m, d] = str.split('-').map(Number);
+    return new Date(y, m - 1, d);
+}
+
+function formatDateToStr(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+}
 
 /* ---------- DATA ---------- */
 function getData() {
@@ -48,6 +91,47 @@ function saveData(data) {
 function calcInteres(monto, tasa, fi, ff) {
     const d = daysBetween(fi, ff);
     return monto * (tasa / 100) * Math.max(d, 0) / 30;
+}
+
+/* ---------- NOTES ---------- */
+function getNotes() {
+    const raw = localStorage.getItem(NOTES_KEY);
+    if (!raw) return { capitalEfectivo: '', capitalVirtual: '', nota: '', ultimaEdicion: '' };
+    return JSON.parse(raw);
+}
+
+function saveNotes(notes) {
+    localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
+}
+
+function showNotesModal() {
+    const notes = getNotes();
+    document.getElementById('nota-efectivo').value = notes.capitalEfectivo;
+    document.getElementById('nota-virtual').value = notes.capitalVirtual;
+    document.getElementById('nota-texto').value = notes.nota;
+    updateUltimaEdicion(notes.ultimaEdicion);
+    openModal('modal-notas');
+}
+
+function updateUltimaEdicion(fecha) {
+    const el = document.getElementById('notas-ultima-edicion');
+    if (!el) return;
+    if (fecha) {
+        el.textContent = 'Última edición: ' + fmtDate(fecha);
+    } else {
+        el.textContent = 'Sin ediciones previas';
+    }
+}
+
+function saveNotesData() {
+    const efectivo = document.getElementById('nota-efectivo').value.trim();
+    const virtual = document.getElementById('nota-virtual').value.trim();
+    const nota = document.getElementById('nota-texto').value.trim();
+    const ultimaEdicion = getPeruDateStr();
+    const notes = { capitalEfectivo: efectivo, capitalVirtual: virtual, nota, ultimaEdicion };
+    saveNotes(notes);
+    updateUltimaEdicion(ultimaEdicion);
+    toast('Notas guardadas');
 }
 
 /* ---------- AMOUNTS VISIBILITY ---------- */
@@ -196,14 +280,13 @@ function fmtDate(s) {
 }
 
 function getDaysRemaining(ff) {
-    const fin = new Date(ff + 'T00:00:00');
-    const hoy = new Date();
-    hoy.setHours(0, 0, 0, 0);
+    const fin = parseDate(ff);
+    const hoy = getPeruDateStart();
     return Math.ceil((fin - hoy) / 86400000);
 }
 
 function daysBetween(a, b) {
-    return Math.round((new Date(b + 'T00:00:00') - new Date(a + 'T00:00:00')) / 86400000);
+    return Math.round((parseDate(b) - parseDate(a)) / 86400000);
 }
 
 function esc(t) {
@@ -232,12 +315,9 @@ function renderDash() {
 
     const compEl = document.getElementById('header-comprometido');
     const compVal = document.getElementById('header-comp-value');
-    if (prestado > 0) {
-        compEl.classList.add('show');
-        compVal.textContent = maskMoney(d.capital);
-    } else {
-        compEl.classList.remove('show');
-    }
+    // FIX: always show capital available
+    compEl.classList.add('show');
+    compVal.textContent = maskMoney(d.capital);
 
     setTxt('dash-capital', maskMoney(d.capital));
     setTxt('dash-prestado', maskMoney(prestado));
@@ -470,7 +550,7 @@ function payLoan(id) {
     if (idx === -1) return;
     const p = d.prestamos[idx];
     const interes = p.interes !== undefined ? p.interes : calcInteres(p.montoOriginal, p.tasa, p.fechaInicio, p.fechaFin);
-    const hoy = new Date().toISOString().split('T')[0];
+    const hoy = getPeruDateStr();
 
     // FIX: interest adds to capital
     d.capital += p.monto + interes;
@@ -522,7 +602,7 @@ function saveEditLoan() {
 
     if (!cambios.length) { toast('Sin cambios'); closeModal('modal-edit'); return; }
 
-    p.ediciones.push({ fecha: new Date().toISOString().split('T')[0], nota, cambios, createdAt: new Date().toISOString() });
+    p.ediciones.push({ fecha: getPeruDateStr(), nota, cambios, createdAt: new Date().toISOString() });
     const ma = p.monto;
     p.nombre = nombre; p.dni = dni; p.monto = monto; p.montoOriginal = monto; p.tasa = tasa; p.fechaInicio = fi; p.fechaFin = ff;
     p.interes = calcInteres(p.montoOriginal, p.tasa, fi, ff);
@@ -549,7 +629,7 @@ function confirmDelete() {
     const idx = d.prestamos.findIndex(p => p.id === currentDeleteId);
     if (idx === -1) return;
     const p = d.prestamos[idx];
-    const hoy = new Date().toISOString().split('T')[0];
+    const hoy = getPeruDateStr();
     d.capital += p.monto;
     d.historial.push({ id: p.id, type: 'delete', nombre: p.nombre, dni: p.dni, montoOriginal: p.montoOriginal, monto: p.monto, tasa: p.tasa, interes: 0, fechaCreacion: p.fechaInicio, fechaEliminacion: hoy, motivo, billetes: p.billetes, cuotas: [...p.cuotas], adiciones: [...p.adiciones], ediciones: [...p.ediciones] });
     const dev = p.monto;
@@ -579,7 +659,7 @@ function addMoreLoan() {
     const p = d.prestamos.find(x => x.id === currentAddMoreId);
     if (!p) return;
     if (monto > d.capital) { toast('Sin capital. Disponible: ' + fmtMoney(d.capital)); return; }
-    p.adiciones.push({ monto, fecha: new Date().toISOString().split('T')[0], nota, createdAt: new Date().toISOString() });
+    p.adiciones.push({ monto, fecha: getPeruDateStr(), nota, createdAt: new Date().toISOString() });
     p.montoOriginal += monto; p.monto += monto;
     if (nff) p.fechaFin = nff;
     p.interes = calcInteres(p.montoOriginal, p.tasa, p.fechaInicio, p.fechaFin);
@@ -599,7 +679,7 @@ function showAddCuota(id) {
     const d = getData();
     const p = d.prestamos.find(x => x.id === id);
     if (!p) return;
-    const hoy = new Date().toISOString().split('T')[0];
+    const hoy = getPeruDateStr();
     document.getElementById('cuota-fecha').value = hoy;
     document.getElementById('cuota-monto').value = '';
     document.getElementById('cuota-nota').value = '';
@@ -624,7 +704,7 @@ function addCuota() {
     d.capital += monto;
 
     if (p.monto <= 0) {
-        const hoy = new Date().toISOString().split('T')[0];
+        const hoy = getPeruDateStr();
         const interes = p.interes !== undefined ? p.interes : calcInteres(p.montoOriginal, p.tasa, p.fechaInicio, p.fechaFin);
         if (p.monto < 0) d.capital += p.monto;
         d.capital += interes;
@@ -644,7 +724,7 @@ function addCuota() {
 function showAddCapitalModal() {
     document.getElementById('capital-monto').value = '';
     document.getElementById('capital-motivo').value = '';
-    document.getElementById('capital-fecha').value = new Date().toISOString().split('T')[0];
+    document.getElementById('capital-fecha').value = getPeruDateStr();
     openModal('modal-add-capital');
 }
 
@@ -666,7 +746,7 @@ function addCapital() {
 function showRetirarModal() {
     document.getElementById('retiro-monto').value = '';
     document.getElementById('retiro-motivo').value = '';
-    document.getElementById('retiro-fecha').value = new Date().toISOString().split('T')[0];
+    document.getElementById('retiro-fecha').value = getPeruDateStr();
     openModal('modal-retirar');
 }
 
@@ -705,13 +785,16 @@ function resetAll() {
     if (!confirm('SEGURO? Se borran TODOS los datos.')) return;
     if (!confirm('REALMENTE seguro? No se puede deshacer.')) return;
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(NOTES_KEY);
     renderAll();
     closeModal('modal-config');
     toast('Todos los datos eliminados');
 }
 
 function showExportModal() {
-    document.getElementById('export-json').value = JSON.stringify(getData(), null, 2);
+    const data = getData();
+    const notes = getNotes();
+    document.getElementById('export-json').value = JSON.stringify({ ...data, notas: notes }, null, 2);
     openModal('modal-export');
 }
 
@@ -722,11 +805,11 @@ function copyExport() {
 }
 
 function downloadExport() {
-    const blob = new Blob([JSON.stringify(getData(), null, 2)], { type: 'application/json' });
+    const blob = new Blob([document.getElementById('export-json').value], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'yabank_backup_' + new Date().toISOString().split('T')[0] + '.json';
+    a.download = 'yabank_backup_' + getPeruDateStr() + '.json';
     a.click();
     URL.revokeObjectURL(url);
     toast('Descargado');
@@ -741,6 +824,7 @@ function importData() {
         if (!confirm('Restaurar? Reemplazara todo.')) return;
         if (!Array.isArray(data.movimientosCapital)) data.movimientosCapital = [];
         if (!Array.isArray(data.retiros)) data.retiros = [];
+        if (data.notas) saveNotes(data.notas);
         saveData(data);
         closeModal('modal-export');
         toast('Datos restaurados');
@@ -784,7 +868,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupCounter('retiro-monto', 'counter-retiro-monto', 4);
 
     // Numeric enforcement
-    ['add-dni','add-monto','add-tasa','edit-dni','edit-monto','edit-tasa','more-monto','cuota-monto','capital-monto','retiro-monto','config-capital'].forEach(enforceNum);
+    ['add-dni','add-monto','add-tasa','edit-dni','edit-monto','edit-tasa','more-monto','cuota-monto','capital-monto','retiro-monto','config-capital','nota-efectivo','nota-virtual'].forEach(enforceNum);
 
     // Nav
     document.querySelectorAll('.nav-item').forEach(btn => {
@@ -795,16 +879,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const fab = document.getElementById('fab-add');
     if (fab) {
         fab.addEventListener('click', () => {
-            const hoy = new Date(); hoy.setHours(0,0,0,0);
-            const ff = new Date(hoy); ff.setDate(hoy.getDate() + 30);
-            document.getElementById('add-fecha-inicio').value = hoy.toISOString().split('T')[0];
-            document.getElementById('add-fecha-fin').value = ff.toISOString().split('T')[0];
+            const hoyStr = getPeruDateStr();
+            const ff = parseDate(hoyStr);
+            ff.setDate(ff.getDate() + 30);
+            document.getElementById('add-fecha-inicio').value = hoyStr;
+            document.getElementById('add-fecha-fin').value = formatDateToStr(ff);
             openModal('modal-add');
         });
     }
 
     // Toggle amounts
     document.getElementById('btn-toggle-amounts')?.addEventListener('click', toggleVis);
+
+    // Notes
+    document.getElementById('btn-notas')?.addEventListener('click', showNotesModal);
+    document.getElementById('btn-guardar-notas')?.addEventListener('click', saveNotesData);
 
     // Menu
     const menuBtn = document.getElementById('btn-menu');
@@ -831,7 +920,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Setup input focus scroll for all modals
-    ['modal-add','modal-edit','modal-add-more','modal-add-cuota','modal-delete','modal-add-capital','modal-retirar','modal-config','modal-export'].forEach(setupInputFocus);
+    ['modal-add','modal-edit','modal-add-more','modal-add-cuota','modal-delete','modal-add-capital','modal-retirar','modal-config','modal-export','modal-notas'].forEach(setupInputFocus);
 
     // Search
     document.getElementById('search-activos')?.addEventListener('input', () => { renderActivos(); updateSearchClear('search-activos'); });
@@ -842,7 +931,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Auto fecha fin
     const fIn = document.getElementById('add-fecha-inicio');
     if (fIn) fIn.addEventListener('change', function() {
-        if (this.value) { const f = new Date(this.value + 'T00:00:00'); f.setDate(f.getDate() + 30); document.getElementById('add-fecha-fin').value = f.toISOString().split('T')[0]; }
+        if (this.value) { const f = parseDate(this.value); f.setDate(f.getDate() + 30); document.getElementById('add-fecha-fin').value = formatDateToStr(f); }
     });
 
     // Action buttons

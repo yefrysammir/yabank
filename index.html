@@ -36,6 +36,9 @@
                     <button class="btn-icon" id="btn-toggle-amounts" title="Mostrar/Ocultar montos">
                         <span class="material-symbols-outlined" id="eye-icon">visibility</span>
                     </button>
+                    <button class="btn-icon" id="btn-notas" title="Notas">
+                        <span class="material-symbols-outlined">sticky_note_2</span>
+                    </button>
                     <div class="header-menu-wrap">
                         <button class="btn-icon" id="btn-menu" title="Menu">
                             <span class="material-symbols-outlined">more_vert</span>
@@ -540,6 +543,49 @@
                             Restaurar
                         </button>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- NOTES MODAL -->
+        <div class="modal-overlay" id="modal-notas">
+            <div class="modal-sheet">
+                <div class="modal-handle"></div>
+                <div class="modal-header">
+                    <h2><span class="material-symbols-outlined">sticky_note_2</span> Notas</h2>
+                    <button class="btn-icon btn-close-modal" data-modal="modal-notas">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="glass-panel">
+                        <h3><span class="material-symbols-outlined">wallet</span> Capital en Caja</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="nota-efectivo">Efectivo</label>
+                                <div class="input-wrap">
+                                    <input type="tel" id="nota-efectivo" placeholder="0" maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+                                    <span class="input-suffix">S/</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="nota-virtual">Virtual</label>
+                                <div class="input-wrap">
+                                    <input type="tel" id="nota-virtual" placeholder="0" maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+                                    <span class="input-suffix">S/</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top: var(--l);">
+                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px; font-weight: 600; letter-spacing: 0.3px;" id="notas-ultima-edicion"></div>
+                        <label for="nota-texto">Nota / Recordatorio</label>
+                        <textarea id="nota-texto" placeholder="Escribe algo importante..." style="min-height: 100px;"></textarea>
+                    </div>
+                    <button class="btn-gradient" id="btn-guardar-notas">
+                        <span class="material-symbols-outlined">save</span>
+                        Guardar Notas
+                    </button>
                 </div>
             </div>
         </div>
