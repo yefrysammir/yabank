@@ -318,7 +318,7 @@ body { background: var(--bg-deep); color: var(--text-primary); -webkit-font-smoo
 .modal-handle { width: 40px; height: 4px;
 background: rgba(255,255,255,0.12);border-radius: var(--r-full); margin: var(--m) auto; flex-shrink: 0; }
 
-.modal-header { padding: 0 var(--xl) var(--m); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: inherit; z-index: 10; padding-top: var(--s); }
+.modal-header { padding: 0 var(--xl) var(--m); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: transparent; z-index: 10; padding-top: var(--s);margin-bottom: var(--m); }
 .modal-header h2 { font-size: 17px; font-weight: 800; display: flex; align-items: center; gap: var(--s); color: var(--text-bright); }
 .modal-body { padding: 0 var(--xl) var(--xl); }
 
@@ -334,7 +334,8 @@ background: rgba(255,255,255,0.12);border-radius: var(--r-full); margin: var(--m
 .form-group input:focus, .form-group textarea:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-glow); }
 .form-group input::placeholder, .form-group textarea::placeholder { color: var(--text-muted); font-weight: 400; }
 .form-group input[type="date"] { -webkit-appearance: none; appearance: none; min-height: 46px; }
-.form-group textarea { resize: vertical; min-height: 72px; }
+.form-group input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1)!important; }
+.form-group textarea { resize: vertical; min-height: 72px; max-height: 100px;}
 
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--m); }
 
