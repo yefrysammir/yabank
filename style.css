@@ -278,13 +278,13 @@ body { background: var(--bg-deep); color: var(--text-primary); -webkit-font-smoo
 /* ============================================
    BOTTOM NAV
    ============================================ */
-.bottom-nav { position: relative; z-index: 10; flex-shrink: 0; background: salmon; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid var(--glass-border); padding: var(--s) var(--l) calc(var(--safe-bottom)); display: flex; justify-content: space-around; }
+.bottom-nav { position: relative; z-index: 10; flex-shrink: 0; background: green; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid var(--glass-border); padding: var(--s) var(--l) calc(var(--safe-bottom)); display: flex; justify-content: space-around; }
 
 @media (display-mode: standalone), (display-mode: fullscreen) {
   .bottom-nav {
     /* Si hay notch (mayor a 0px), pone 25px. Si no hay notch, mantiene 15px */
     padding-bottom: max(0px, calc(env(safe-area-inset-bottom) + 0px - env(safe-area-inset-bottom)));
-    margin-bottom: max(0px, calc(env(safe-area-inset-bottom) + 0px - env(safe-area-inset-bottom)));
+    margin-bottom: -20px!important;
   }
 }
 
