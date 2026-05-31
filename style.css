@@ -278,7 +278,7 @@ body { background: var(--bg-deep); color: var(--text-primary); -webkit-font-smoo
 /* ============================================
    BOTTOM NAV
    ============================================ */
-.bottom-nav { position: fixed;bottom:0;left:0;right:0; z-index: 10; flex-shrink: 0; background: red; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid var(--glass-border); padding: var(--s) var(--l) calc(var(--safe-bottom)); display: flex; justify-content: space-around; }
+.bottom-nav { position: relative; z-index: 10; flex-shrink: 0; background: linear-gradient(to top, rgba(8, 13, 23, 0.97), rgba(12, 18, 34, 0.9)); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid var(--glass-border); padding: var(--s) var(--l) calc(var(--safe-bottom)); display: flex; justify-content: space-around; }
 
 @media (display-mode: standalone), (display-mode: fullscreen) {
   .bottom-nav {
